@@ -1,0 +1,70 @@
+version: '3'
+services:
+    homeassistant:
+        image: homeassistant/home-assistant:latest
+        ports:
+            - 8123:8123
+        volumes:
+            - homeassistant0:/config
+            - /etc/localtime:/etc/localtime:ro
+            - /etc/timezone:/etc/timezone:ro
+        restart: always
+        depends_on: 
+            - influxdb
+            - mosquitto
+    influxdb:
+        image: bitnami/influxdb:latest
+        ports:
+            - '8086:8086'
+        volumes:
+            - influxdb-storage:/var/lib/influxdb
+        environment:
+            - INFLUXDB_ADMIN_USER_PASSWORD=${INFLUXDB_PASSWORD_ADMIN}
+            - INFLUXDB_USER_BUCKET=cassiopeiainflux
+            - INFLUXDB_USER=${INFLUXDB_USER}
+            - INFLUXDB_USER_PASSWORD=${INFLUXDB_PASSWORD}
+            - INFLUXDB_ADMIN_USER_TOKEN=admintoken123
+            - INFLUXDB_USER_ORG=it
+        restart: always
+        
+    mosquitto:
+        image: eclipse-mosquitto:1.6.13
+        ports: 
+            - '1883:1883'
+            - '9001:9001'
+        volumes:
+            - mosquitto-data:/mosquitto/data
+            - mosquitto-logs:/mosquitto/logs
+            - mosquitto-conf:/mosquitto/config
+        restart: always
+volumes:
+    influxdb-storage:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./influxdb
+    homeassistant:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./homeassistant
+    mosquitto-data:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./mosquitto/mosquittodata
+    mosquitto-logs:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./mosquitto/mosquittologs
+    mosquitto-conf:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./mosquitto/mosquittoconf
