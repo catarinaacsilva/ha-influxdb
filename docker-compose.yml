@@ -5,7 +5,7 @@ services:
         ports:
             - 8123:8123
         volumes:
-            - homeassistant0:/config
+            - homeassistant:/config
             - /etc/localtime:/etc/localtime:ro
             - /etc/timezone:/etc/timezone:ro
         restart: always
